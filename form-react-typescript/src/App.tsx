@@ -2,21 +2,49 @@
 import UserForm from './components/UserForm';
 import ReviewForm from './components/ReviewForm';
 import Thanks from './components/Thanks';
+import Steps from './components/Steps';
 
 import { GrFormNext, GrFormPrevious } from 'react-icons/gr';
+import { FiSend } from 'react-icons/fi';
 
 //Hooks
+import { useState } from 'react';
 import { useForm } from './hooks/useForm';
 
 //CSS
 import './App.css'
 
+type FormFields = {
+  name: string;
+  email: string;
+  review: string;
+  comment: string;
+};
+
+const formTemplate: FormFields = {
+  name: "",
+  email: "",
+  review: "",
+  comment: "",
+};
+
 function App() {
+  const [data, setData] = useState(formTemplate);
 
-  const formComponents = [<UserForm />, <ReviewForm />, <Thanks />];
+  const updateFielHandler = (key: string, value: string) => {
+    setData((prev) => {
+      return { ...prev, [key]: value };
+    });
+  };
+
+  const formComponents = [
+    <UserForm data={data} updateFieldHandler={updateFielHandler} />,
+    <ReviewForm data={data} updateFieldHandler={updateFielHandler} />,
+    <Thanks data={data} />,
+  ];
 
 
-  const { currentStep, currentComponent, changeStep } = useForm(formComponents);
+  const { currentStep, currentComponent, changeStep, isLastStep } = useForm(formComponents);
 
   return (
     <div className='app'>
@@ -29,7 +57,7 @@ function App() {
         </p>
       </div >
       <div className='form-container'>
-        <p>passos</p>
+        <Steps currentStep={currentStep} />
         <form onSubmit={(e) => changeStep(currentStep + 1, e)}>
           <div className='inputs-container'>{currentComponent}</div>
           <div className='actions'>
@@ -37,10 +65,18 @@ function App() {
               <GrFormPrevious />
               <span>Voltar</span>
             </button>
-            <button type="submit">
-              <span>Avançar</span>
-              <GrFormNext />
-            </button>
+
+            {!isLastStep ? (
+              <button type="submit">
+                <span>Avançar</span>
+                <GrFormNext />
+              </button>
+            ) : (
+              <button type="button">
+                <span>Enviar</span>
+                <FiSend />
+              </button>
+            )}
           </div>
         </form>
       </div>
